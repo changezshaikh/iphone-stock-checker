@@ -10,8 +10,10 @@ Environment variables:
   DRY_RUN=1         print messages instead of sending them
 """
 
+import html
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -77,9 +79,14 @@ def send_telegram(text):
     url = "https://api.callmebot.com/text.php?" + urllib.parse.urlencode(
         {"user": user, "text": text})
     with urllib.request.urlopen(url, timeout=30) as resp:
-        # CallMeBot replies HTTP 200 even on errors, so log what it said.
         body = resp.read().decode("utf-8", "replace")
-        print(f"Telegram sent (HTTP {resp.status}): {body[:300]}")
+    # CallMeBot replies HTTP 200 with an HTML page even on errors, so read the page text.
+    body = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>|<!--.*?-->|<[^>]+>", " ", body)
+    reply = re.sub(r"\s+", " ", html.unescape(body)).strip()
+    if "Error" in reply:
+        # Fail the run so GitHub emails you; state isn't saved, so the alert is retried next run.
+        raise RuntimeError(f"Telegram send failed: {reply[:400]}")
+    print(f"Telegram sent: {reply[:200]}")
 
 
 def load_state():
