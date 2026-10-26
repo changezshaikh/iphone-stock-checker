@@ -1,0 +1,39 @@
+name: Check iPhone stock
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # every 5 minutes (GitHub may delay runs by a few minutes)
+  workflow_dispatch:       # lets you run it by hand from the Actions tab
+
+concurrency:
+  group: check-stock
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # state.json remembers what was already in stock, so you are only alerted once per store.
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: state.json
+          key: stock-state-${{ github.run_id }}
+          restore-keys: stock-state-
+
+      - name: Check stock
+        env:
+          CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
+          CALLMEBOT_APIKEY: ${{ secrets.CALLMEBOT_APIKEY }}
+          POSTCODE: "3042"
+        run: python3 check_stock.py
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state.json
+          key: stock-state-${{ github.run_id }}
