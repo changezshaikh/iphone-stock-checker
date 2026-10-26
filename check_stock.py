@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Check Apple AU same-day pickup stock for iPhone Duo and alert via WhatsApp (CallMeBot).
+"""Check Apple AU same-day pickup stock for iPhone Duo and alert via Telegram (CallMeBot).
 
 Environment variables:
-  CALLMEBOT_PHONE   your WhatsApp number in international format, e.g. +61400000000
-  CALLMEBOT_APIKEY  the API key CallMeBot sent you
+  TELEGRAM_USER     your Telegram username, e.g. @myusername
+                    (first send /start to @CallMeBot_txtbot in Telegram)
   POSTCODE          optional, defaults to 3042
   STATE_FILE        optional, defaults to state.json
   DRY_RUN=1         print messages instead of sending them
@@ -62,16 +62,19 @@ def fetch_stock():
     return result
 
 
-def send_whatsapp(text):
+def send_telegram(text):
     if os.environ.get("DRY_RUN") == "1":
-        print(f"[DRY RUN] WhatsApp: {text}")
+        print(f"[DRY RUN] Telegram: {text}")
         return
-    phone = os.environ["CALLMEBOT_PHONE"]
-    apikey = os.environ["CALLMEBOT_APIKEY"]
-    url = "https://api.callmebot.com/whatsapp.php?" + urllib.parse.urlencode(
-        {"phone": phone, "text": text, "apikey": apikey})
+    user = os.environ["TELEGRAM_USER"]
+    if not user.startswith("@"):
+        user = "@" + user
+    url = "https://api.callmebot.com/text.php?" + urllib.parse.urlencode(
+        {"user": user, "text": text})
     with urllib.request.urlopen(url, timeout=30) as resp:
-        print(f"WhatsApp sent (HTTP {resp.status})")
+        # CallMeBot replies HTTP 200 even on errors, so log what it said.
+        body = resp.read().decode("utf-8", "replace")
+        print(f"Telegram sent (HTTP {resp.status}): {body[:300]}")
 
 
 def load_state():
@@ -97,7 +100,7 @@ def main():
         state["failures"] += 1
         print(f"Stock check failed ({state['failures']} in a row): {detail}")
         if state["failures"] >= FAILURE_ALERT_THRESHOLD and not state["failure_alerted"]:
-            send_whatsapp(f"iPhone stock checker: Apple's stock check has failed "
+            send_telegram(f"iPhone stock checker: Apple's stock check has failed "
                           f"{state['failures']} times in a row ({detail}). "
                           f"Alerts may not work until it recovers.")
             state["failure_alerted"] = True
@@ -105,7 +108,7 @@ def main():
         return 0
 
     if state["failure_alerted"]:
-        send_whatsapp("iPhone stock checker: Apple's stock check is working again.")
+        send_telegram("iPhone stock checker: Apple's stock check is working again.")
     state["failures"] = 0
     state["failure_alerted"] = False
 
@@ -116,7 +119,7 @@ def main():
 
     if newly:
         lines = [f"- {PARTS[k.split('|')[0]]} at {k.split('|')[1]}" for k in newly]
-        send_whatsapp("iPhone Duo available for pickup today!\n" + "\n".join(lines)
+        send_telegram("iPhone Duo available for pickup today!\n" + "\n".join(lines)
                       + f"\n{PRODUCT_URL}")
 
     state["available"] = now_available

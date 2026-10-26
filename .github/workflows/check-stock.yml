@@ -26,8 +26,7 @@ jobs:
 
       - name: Check stock
         env:
-          CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
-          CALLMEBOT_APIKEY: ${{ secrets.CALLMEBOT_APIKEY }}
+          TELEGRAM_USER: ${{ secrets.TELEGRAM_USER }}
           POSTCODE: "3042"
         run: python3 check_stock.py
 

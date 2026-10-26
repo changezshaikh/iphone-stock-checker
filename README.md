@@ -1,7 +1,7 @@
 # iPhone Duo stock checker
 
 Checks Apple AU same-day pickup stock near postcode 3042 every 5 minutes (via GitHub Actions)
-and sends a WhatsApp message when any of these become available:
+and sends a Telegram message (via CallMeBot) when any of these become available:
 
 | Part     | Model                     |
 |----------|---------------------------|
@@ -15,16 +15,15 @@ warning if Apple's stock check keeps failing for an hour.
 
 ## Setup
 
-1. **Get a CallMeBot WhatsApp key**
-   - Save `+34 644 66 32 62` in your phone contacts (check https://www.callmebot.com/blog/free-api-whatsapp-messages/ for the current number).
-   - Send it the WhatsApp message: `I allow callmebot to send me messages`
-   - It replies with your API key.
+1. **Authorise CallMeBot on Telegram**
+   - Make sure you have a Telegram username (Settings → Username).
+   - In Telegram, open @CallMeBot_txtbot and send `/start`.
+   - Details: https://www.callmebot.com/blog/telegram-text-messages/
 
 2. **Create a private GitHub repo** and push this folder to it.
 
 3. **Add secrets** in the repo: Settings → Secrets and variables → Actions → New repository secret
-   - `CALLMEBOT_PHONE`: your number, e.g. `+61400000000`
-   - `CALLMEBOT_APIKEY`: the key from step 1
+   - `TELEGRAM_USER`: your Telegram username, e.g. `@myusername`
 
 4. **Test it**: Actions tab → "Check iPhone stock" → Run workflow. Check the log.
 
