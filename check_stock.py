@@ -6,6 +6,7 @@ Environment variables:
                     (first send /start to @CallMeBot_txtbot in Telegram)
   POSTCODE          optional, defaults to 3042
   STATE_FILE        optional, defaults to state.json
+  TEST_PARTS        optional, extra part numbers to check (space separated), used to test alerts
   DRY_RUN=1         print messages instead of sending them
 """
 
@@ -23,8 +24,12 @@ PARTS = {
     "MK2F4X/A": "iPhone Duo 512GB Star White",
     "MK2G4X/A": "iPhone Duo 512GB Night Sky",
 }
+# Test mode: check extra (in-stock) parts with a throwaway state file so real alert history is untouched.
+TEST_PARTS = os.environ.get("TEST_PARTS", "").split()
+for _part in TEST_PARTS:
+    PARTS[_part] = f"TEST ALERT ({_part})"
 POSTCODE = os.environ.get("POSTCODE", "3042")
-STATE_FILE = os.environ.get("STATE_FILE", "state.json")
+STATE_FILE = "state-test.json" if TEST_PARTS else os.environ.get("STATE_FILE", "state.json")
 # Warn once after this many failed checks in a row (12 x 5 min = 1 hour).
 FAILURE_ALERT_THRESHOLD = 12
 

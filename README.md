@@ -25,7 +25,9 @@ warning if Apple's stock check keeps failing for an hour.
 3. **Add secrets** in the repo: Settings → Secrets and variables → Actions → New repository secret
    - `TELEGRAM_USER`: your Telegram username, e.g. `@myusername`
 
-4. **Test it**: Actions tab → "Check iPhone stock" → Run workflow. Check the log.
+4. **Test it**: Actions tab → "Check iPhone stock" → Run workflow. To test that alerts reach you,
+   enter an in-stock part number such as `MKFT4X/A` (AirPods) in the test box. Test runs don't
+   affect the normal alert history.
 
 The schedule starts automatically after that. To stop it, disable the workflow in the Actions tab.
 

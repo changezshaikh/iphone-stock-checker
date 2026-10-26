@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "*/5 * * * *"  # every 5 minutes (GitHub may delay runs by a few minutes)
   workflow_dispatch:       # lets you run it by hand from the Actions tab
+    inputs:
+      test_parts:
+        description: "Test alerts: extra in-stock part numbers to check (e.g. MKFT4X/A for AirPods). Leave blank for a normal run."
+        required: false
+        default: ""
 
 concurrency:
   group: check-stock
@@ -28,6 +33,7 @@ jobs:
         env:
           TELEGRAM_USER: ${{ secrets.TELEGRAM_USER }}
           POSTCODE: "3042"
+          TEST_PARTS: ${{ inputs.test_parts }}
         run: python3 check_stock.py
 
       - name: Save state
