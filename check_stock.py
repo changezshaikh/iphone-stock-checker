@@ -83,10 +83,12 @@ def send_telegram(text):
     # CallMeBot replies HTTP 200 with an HTML page even on errors, so read the page text.
     body = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>|<!--.*?-->|<[^>]+>", " ", body)
     reply = re.sub(r"\s+", " ", html.unescape(body)).strip()
+    # The repo is public, so keep the username out of the run logs.
+    reply = reply.replace(user.lstrip("@"), "<user>")
     if "Error" in reply:
         # Fail the run so GitHub emails you; state isn't saved, so the alert is retried next run.
         raise RuntimeError(f"Telegram send failed: {reply[:400]}")
-    print(f"Telegram sent: {reply[:200]}")
+    print("Telegram sent OK")
 
 
 def load_state():
